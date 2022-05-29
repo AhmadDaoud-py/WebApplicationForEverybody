@@ -1,0 +1,64 @@
+genre 1 rock 2 metal
+
+album 1 who made who metal(2)
+album 2 IV rock(1)
+
+INSERT INTO Track (title, rating, len, count, album_id, genre_id)
+    VALUES ('Black Dog', 5, 297, 0, 2, 1);
+INSERT INTO Track (title, rating, len, count, album_id, genre_id)
+    VALUES ('Stairway', 5, 482, 0, 2, 1);
+INSERT INTO Track (title, rating, len, count, album_id, genre_id)
+    VALUES ('About to Rock', 5, 313, 0, 1, 2);
+INSERT INTO Track (title, rating, len, count, album_id, genre_id)
+    VALUES ('Who Made Who', 5, 207, 0, 1, 2);
+
+
+SELECT * from Track join Album join Genre join Artist ON Track.genre_id = Genre.genre_id and Track.album_id = Album.album_id and Artist.artist_id = Album.artist_id ORDERBY Album.title;
+
+select DISTINCT Genre.name, Artist.name from Genre join Artist join Track join Album on Track.genre_id = Genre.genre_id and Track.album_id = Album.album_id and Artist.artist_id = Album.artist_id where Artist.name = 'Led Zepplin';
+
+
+
+
+User
+insert into `User` (name) values('Turner');
+insert into `User` (name) values('Anika');
+insert into `User` (name) values('Kabeer');
+insert into `User` (name) values('Kym');
+insert into `User` (name) values('Reed');
+insert into `User` (name) values('Sylvana');
+insert into `User` (name) values('Keigan');
+insert into `User` (name) values('Lydia');
+insert into `User` (name) values('Razan');
+insert into `User` (name) values('Tasnim');
+insert into `User` (name) values('Cooper');
+insert into `User` (name) values('Jae');
+insert into `User` (name) values('Kerrigan');
+insert into `User` (name) values('Nika');
+insert into `User` (name) values('Riley');
+
+Course
+
+insert into Course (title) values('si106');
+insert into Course (title) values('si110');
+insert into Course (title) values('si206');
+
+Member
+
+insert into Member (user_id, course_id, role) values(1,1,1);
+insert into Member (user_id, course_id, role) values(2,1,0);
+insert into Member (user_id, course_id, role) values(3,1,0);
+insert into Member (user_id, course_id, role) values(4,1,0);
+insert into Member (user_id, course_id, role) values(5,1,0);
+insert into Member (user_id, course_id, role) values(6,2,1);
+insert into Member (user_id, course_id, role) values(7,2,0);
+insert into Member (user_id, course_id, role) values(8,2,0);
+insert into Member (user_id, course_id, role) values(9,2,0);
+insert into Member (user_id, course_id, role) values(10,2,0);
+insert into Member (user_id, course_id, role) values(11,3,1);
+insert into Member (user_id, course_id, role) values(12,3,0);
+insert into Member (user_id, course_id, role) values(13,3,0);
+insert into Member (user_id, course_id, role) values(14,3,0);
+insert into Member (user_id, course_id, role) values(15,3,0);
+
+

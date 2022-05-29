@@ -1,0 +1,585 @@
+autos.php
+<?php
+
+$failure = false;
+$success = false; 
+
+// Demand a GET parameter
+if ( ! isset($_GET['name']) || strlen($_GET['name']) < 1  ) {
+    die('Name parameter missing');
+}
+
+// If the user requested logout go back to index.php
+if ( isset($_POST['logout']) ) {
+    header('Location: index.php');
+    return;
+}
+
+require_once "pdo.php";
+
+if ( isset($_POST['add']) ) {
+    if ( strlen($_POST['make']) < 1 ) {
+        $failure = "Make is required";
+    } else {
+        if ( !is_numeric($_POST['year']) || !is_numeric($_POST['mileage'])){
+        $failure = "Mileage and year must be numeric";
+    } else {
+        if ( isset($_POST['make']) && isset($_POST['year']) && isset($_POST['mileage']) ) {
+            $sql = 'INSERT INTO autos (make, year, mileage)
+                    VALUES (:mk, :yr, :mi)';
+            // echo("<pre>\n".$sql."\n</pre>\n");
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute(array(
+            ':mk' => $_POST['make'],
+            ':yr' => $_POST['year'],
+            ':mi' => $_POST['mileage'])
+            );
+            $success = "Record Inserted";
+            } 
+        }
+    }
+}
+
+
+$stmt = $pdo->query("SELECT make, year, mileage FROM autos");
+$rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+?>
+
+
+<!DOCTYPE html>
+<html>
+<head>
+<title>Yuk Tung Chung's Automobile Tracker</title>
+<?php require_once "bootstrap.php"; ?>
+</head>
+<body>
+<div class="container">
+<h1> Tracking Autos for
+<?php
+if ( isset($_REQUEST['name']) ) {
+    echo htmlentities($_REQUEST['name']);
+    echo "</p>\n";
+}
+?>
+</h1>
+
+
+<?php
+
+// Note triple not equals and think how badly double
+// not equals would work here...
+if ( $failure !== false ) {
+    // Look closely at the use of single and double quotes
+    echo('<p style="color: red;">'.htmlentities($failure)."</p>\n");
+}
+
+if ( $success !== false ) {
+    // Look closely at the use of single and double quotes
+    echo('<p style="color: green;">'.htmlentities($success)."</p>\n");
+}
+
+?>
+
+<form method="post">
+
+<p>
+    Make: 
+    <input type="text" name="make" size="60">
+</p>
+<p>
+    Year: 
+    <input type="text" name="year">
+</p>
+<p>
+    Mileage: 
+    <input type="text" name="mileage">
+</p>
+
+<input type="submit" name= "add" value="Add">
+<input type="submit" name="logout" value="Logout">
+</form>
+
+<h2>Automobiles</h2>
+
+<?php
+
+echo("<ul>");
+
+foreach ( $rows as $row ) {
+    echo("<li>".htmlentities($row['year'])." ".htmlentities($row['make'])." / ".htmlentities($row['mileage'])."</li>\n");
+}
+
+echo("</ul>");
+?>
+
+</div>
+</body>
+</html>
+
+________________________________________________
+login.php
+
+<?php // Do not put any HTML above this line
+
+if ( isset($_POST['cancel'] ) ) {
+    // Redirect the browser to autos.php
+    header("Location: index.php");
+    return;
+}
+
+$salt = 'XyZzy12*_';
+$stored_hash = '1a52e17fa899cf40fb04cfc42e6352f1';  // Pw is php123
+
+$failure = false;  // If we have no POST data
+
+// Check to see if we have some POST data, if we do process it
+if ( isset($_POST['who']) && isset($_POST['pass']) ) {
+
+
+    if ( strlen($_POST['who']) < 1 || strlen($_POST['pass']) < 1 ) {
+        $failure = "Email and password are required";
+    } else {
+        if (strpos($_POST['who'], '@') === false) {
+        $failure = "Email must have an at-sign (@)";
+        } else{
+            $check = hash('md5', $salt.$_POST['pass']);
+            if ( $check == $stored_hash ) {
+                // Redirect the browser to auto.php
+                header("Location: autos.php?name=".urlencode($_POST['who']));
+                error_log("Login success ".$_POST['who']);
+                return;
+            } else {
+                $failure = "Incorrect password";
+                error_log("Login fail ".$_POST['who']." $check");
+            }
+        }
+    }
+}
+
+// Fall through into the View
+?>
+<!DOCTYPE html>
+<html>
+<head>
+<?php require_once "bootstrap.php"; ?>
+<title>Yuk Tung Chung's Login Page</title>
+</head>
+<body>
+<div class="container">
+<h1>Please Log In</h1>
+<?php
+// Note triple not equals and think how badly double
+// not equals would work here...
+if ( $failure !== false ) {
+    // Look closely at the use of single and double quotes
+    echo('<p style="color: red;">'.htmlentities($failure)."</p>\n");
+}
+?>
+<form method="POST">
+<label for="nam">Email</label>
+<input type="text" name="who" id="nam"><br/>
+<label for="id_1723">Password</label>
+<input type="text" name="pass" id="id_1723"><br/>
+<input type="submit" value="Log In">
+<input type="submit" name="cancel" value="Cancel">
+</form>
+<p>
+For a password hint, view source and find a password hint
+in the HTML comments.
+<!-- Hint: The password is the four character sound a cat
+makes (all lower case) followed by 123. -->
+</p>
+</div>
+</body>
+
+_____________________________________________________________-
+login.php
+<html>
+
+<head>
+    <title>ΑΧΙΛΛΕΥΣ ΣΤΥΛΙΑΝΟΣ ΤΖΑΒΑΛΑΣ</title>
+</head>
+
+<body>
+    <h1>Please Log in</h1>
+
+
+    <?php
+    require_once "pdo.php";
+
+    if (isset($_POST['cancel'])) {
+
+        header("Location: index.php");
+    }
+
+
+
+    if (isset($_POST['who']) && isset($_POST['pass'])) {
+
+
+        if (empty($_POST['who']) || empty($_POST['pass'])) {
+            echo '<p style="color: red">User name and password are required</p>';
+        } else if (strpos($_POST['who'], '@') === false) {
+            echo '<p style="color: red">Email must have an at-sign (@)</p>';
+        } else {
+
+            $sql = "SELECT name From users WHERE email = :em AND password = :pw";
+
+
+
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute(array(':em' => $_POST['who'], ':pw' => $_POST['pass']));
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+
+
+
+            if ($row === FALSE) {
+                $hash = hash('sha256', $_POST['pass']);
+                error_log("Login failed " . $_POST['who'] . " $hash");
+                echo "<p style='color: red'>Incorrect password</p>";
+            } else {
+                error_log("Login success " . $_POST['who']);
+                echo "<h1>Login success</h1>\n";
+                header("Location: autos.php?name=" . urlencode($_POST['who']));
+            }
+        }
+    }
+
+
+
+
+
+
+
+    //if (($_POST['email'])) {
+    //$pattern = "/@/i";
+    //preg_match($pattern, $_POST['email']);
+    //echo "email must contain @";}
+
+
+    ?>
+
+
+
+
+    <form method="post">
+        <input type="text" name="who" placeholder="email">
+        <input type="password" name="pass" placeholder="Password">
+        <input type="submit" name="login" value="Log In" />
+
+        <input type="submit" name="cancel" value="Cancel" />
+        <a href="<?php echo ($_SERVER['PHP_SELF']); ?>">Refresh</a></p>
+
+
+    </form>
+</body>
+
+</html>
+
+________________________________________________
+autos.php
+<html>
+
+<head>
+    <title>ΑΧΙΛΛΕΥΣ ΣΤΥΛΙΑΝΟΣ ΤΖΑΒΑΛΑΣ</title>
+</head>
+
+<body>
+
+    <?php
+
+    require_once "pdo.php";
+
+    if (isset($_GET['name'])) {
+        echo "<h1>Tracking Autos for " . $_GET['name'] . "</h1>";
+    } else {
+        die("Name parameter missing");
+    }
+
+    if (isset($_POST['logout'])) {
+
+        header("Location: index.php");
+    } else {
+        if (isset($_POST['make']) && isset($_POST['year']) && isset($_POST['mileage'])) {
+            if (empty($_POST['make'])) {
+                echo "<p style='color: red'>Make is required</p>";
+            } else if (is_numeric($_POST['year']) && is_numeric($_POST['mileage'])) {
+                $sql = "INSERT INTO autos (make, year, mileage) VALUES (:make, :year, :mileage)";
+                $stmt = $pdo->prepare($sql);
+                $stmt->execute(array(':make' => $_POST['make'], ':year' => $_POST['year'], ':mileage' => $_POST['mileage']));
+
+
+
+                echo "<p style='color: green'>Record inserted</p>";
+            } else {
+
+                echo "<p style='color: red'>Mileage and year must be numeric</p>";
+            }
+        }
+    }
+
+    ?>
+
+
+
+
+    <form method="post">
+        <p>Make:
+            <input type="text" name="make" size="60" />
+        </p>
+        <p>Year:
+            <input type="text" name="year" />
+        </p>
+        <p>Mileage:
+            <input type="text" name="mileage" />
+        </p>
+        <input type="submit" name="Add" value="Add">
+        <input type="submit" name="logout" value="Logout">
+    </form>
+
+    <h2>Automobiles</h2>
+    <ul>
+        <?php
+
+        $stmt = $pdo->query("SELECT auto_id, make, year, mileage FROM autos");
+
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            echo "<li> ";
+            echo $row['year'] . " ";
+            echo htmlentities($row['make']) . " / ";
+            echo $row['mileage'];
+            echo "</li>";
+        }
+        ?>
+    </ul>
+</body>
+
+</html>
+_______________________________________________________________
+login.php
+<?php // Do not put any HTML above this line
+
+if ( isset($_POST['cancel'] ) ) {
+    // Redirect the browser to game.php
+    header("Location: index.php");
+    return;
+}
+
+// The str_contains function is new for PHP 8 :)
+// For earlier versions of PHP (7 or below), we may may polyfill the str_contains function using the following snippet.
+// This example was taken from PHP Docs (https://www.php.net/manual/en/function.str-contains.php):
+if (!function_exists('str_contains')) {
+    function str_contains($haystack, $needle) {
+        return $needle !== '' && mb_strpos($haystack, $needle) !== false;
+    }
+}
+
+$salt = 'XyZzy12*_';
+$stored_hash = '1a52e17fa899cf40fb04cfc42e6352f1';  // Pw is php123
+
+$failure = false;  // If we have no POST data
+
+// Check to see if we have some POST data, if we do process it
+if ( isset($_POST['who']) && isset($_POST['pass']) ) {
+    
+    if ( strlen($_POST['who']) < 1 || strlen($_POST['pass']) < 1 ) {
+        $failure = "Whoops! User name and password are required";
+    } elseif ( str_contains($_POST['who'], '@') === false ) {
+            $failure = "Email must have an at-sign (@)";
+    } else {
+        $check = hash('md5', $salt.$_POST['pass']);
+        if ( $check == $stored_hash ) {
+            error_log("Login success ".$_POST['who']);
+            // Redirect the browser to game.php
+            header("Location: autos.php?name=".urlencode($_POST['who']));
+            return;
+        } else {
+            $failure = "Whoops! Incorrect password. Please try again.";
+            error_log("Login fail ".$_POST['who']." $check");
+        }
+    }
+
+}
+
+// Fall through into the View
+?>
+<!DOCTYPE html>
+<html>
+<head>
+<?php require_once "bootstrap.php"; ?>
+<title>Alexander Kell - PHP MySQL AutosDB</title>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+<div class="container-fluid">
+<a class="navbar-brand" href="#">Week 2: Alex's AutosDB</a>
+<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+  <span class="navbar-toggler-icon"></span>
+</button>
+<div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+  <div class="navbar-nav">
+    <a class="nav-link" href="index.php">Home</a>
+    <a class="nav-link" href="autos.php">Autos</a>
+    <a class="nav-link active" aria-current="page"href="login.php">Login</a>
+  </div>
+</div>
+</div>
+</nav>
+<div class="container-md">
+<h1 class="display-2">Please Log In</h1>
+<?php
+if ( $failure !== false ) {
+    echo('<div class="alert alert-danger" role="alert">'.htmlentities($failure)."</div>\n");
+}
+?>
+
+<form method="POST">
+  <div class="row mb-3 mt-3">
+    <div class="input-group">
+    <label for="username" class="col-sm-2 col-form-label">Username</label>
+      <div class="input-group-text">@</div>
+      <input type="text" class="form-control" name="who" id="username" placeholder="Username">
+    </div>
+  </div>
+  <div class="row mb-3">
+    <div class="input-group">
+    <label for="password" class="col-sm-2 col-form-label">Password</label>
+      <div class="input-group-text">🔐</div>
+      <input type="password" class="form-control" id="password" name="pass" placeholder="Password">
+    </div>
+  </div>
+  <button type="submit" class="btn btn-primary">Log In</button>
+  <input type="reset" class="btn btn-outline-secondary" value="Reset this form"></button>
+  <input type="submit" class="btn btn-outline-info" name="cancel" value="Cancel & go home"></button>
+</form>
+
+<p>
+For a password hint, view source and find a password hint
+in the HTML comments.
+<!-- Hint: The password is php followed by 123. -->
+</p>
+</div>
+</body>
+
+_____________________________________________________________
+autos.php
+
+<?php
+require_once "pdo.php";
+
+// Demand a GET parameter
+if ( ! isset($_GET['name']) || strlen($_GET['name']) < 1  ) {
+    die('Whoops! Name parameter missing');
+}
+
+// If the user requested logout go back to index.php
+if ( isset($_POST['logout']) ) {
+    header('Location: index.php');
+    return;
+}
+
+$failure = false;  // If we have no POST data
+$success = false;
+
+// Check to see if we have some POST data, if we do process it
+if ( isset($_POST['make']) && isset($_POST['year']) && isset($_POST['mileage']) ) {
+
+    if ( is_numeric($_POST['year']) === false || is_numeric($_POST['mileage']) === false) {
+        $failure = "Whoops! Mileage and year must be numeric";
+    } elseif ( strlen($_POST['make']) < 1 ) {
+        $failure = "Whoops! Make is required"; 
+    } else {
+        $sql = "INSERT INTO autos (make, year, mileage) VALUES (:make, :year, :mileage)";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute(array(
+            ':make' => $_POST['make'],
+            ':year' => $_POST['year'],
+            ':mileage' => $_POST['mileage']
+        ));
+        $success = "Record inserted";
+    }
+
+}
+
+$stmt = $pdo->query("SELECT * FROM autos");
+$rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alexander Kell - PHP MySQL AutosDB</title>
+    <?php require_once "bootstrap.php"; ?>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+<div class="container-fluid">
+<a class="navbar-brand" href="#">Week 2: Alex's AutosDB</a>
+<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+  <span class="navbar-toggler-icon"></span>
+</button>
+<div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+  <div class="navbar-nav">
+    <a class="nav-link" href="index.php">Home</a>
+    <a class="nav-link active" aria-current="page" href="autos.php">Autos</a>
+    <a class="nav-link" aria-current="page" href="login.php">Login</a>
+  </div>
+</div>
+</div>
+</nav>
+<div class="container-md">
+<h1 class="display-2">Tracking autos for <?php echo $_GET['name'] ?></h1>
+<p>Hello 👋. You may use this form below to add a new automobile to our database!</p>
+<?php
+if ( $failure !== false ) {
+    echo('<div class="alert alert-danger" role="alert">'.htmlentities($failure)."</div>\n");
+}
+if ( $success !== false ) {
+    echo('<div class="alert alert-success" role="alert">'.htmlentities($success)."</div>\n");
+}
+?>
+
+<form method="POST">
+  <div class="row mb-3 mt-3">
+    <div class="input-group">
+    <label for="make" class="col-sm-2 col-form-label">Make</label>
+      <input type="text" class="form-control" id="make" name="make" placeholder="Subaru">
+    </div>
+  </div>
+  <div class="row mb-3">
+    <div class="input-group">
+    <label for="year" class="col-sm-2 col-form-label">Year</label>
+      <input type="text" class="form-control" id="year" name="year" placeholder="2016">
+    </div>
+  </div>
+  <div class="row mb-3">
+    <div class="input-group">
+    <label for="mileage" class="col-sm-2 col-form-label">Mileage</label>
+      <input type="text" class="form-control" id="mileage" name="mileage" placeholder="45000">
+    </div>
+  </div>  
+  <button type="submit" class="btn btn-primary">Add</button>
+  <input type="submit" class="btn btn-outline-info" name="logout" value="Logout"></button>
+</form>
+</div>
+
+<div class="container-md mt-4">
+<h1 class="display-2">Automobiles in our database</h1>
+<?php
+foreach ( $rows as $row ) {
+    echo "<li>";
+    // year model / mileage
+    echo(htmlentities($row['year']));
+    echo(" " . htmlentities($row['make']));
+    echo(" / " . htmlentities($row['mileage']));
+    echo "</li>";
+}
+?>
+</div>
+</div>
+</body>
+</html>
